@@ -1,3 +1,5 @@
+import { trackAuth } from './analytics.js';
+
 const API_URL = 'http://localhost:3000/api';
 
 export async function login(email, password) {
@@ -12,6 +14,7 @@ export async function login(email, password) {
 
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
+    trackAuth('login');
     return data;
 }
 
@@ -27,12 +30,14 @@ export async function register(name, email, password) {
 
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
+    trackAuth('signup');
     return data;
 }
 
 export function logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    trackAuth('logout');
     window.location.reload();
 }
 

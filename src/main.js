@@ -1,5 +1,9 @@
 import './style.css'
 import { getCurrentUser, logout } from './auth.js';
+import { initGA, trackEvent, trackGamePlay, trackQuizComplete, trackAuth } from './analytics.js';
+
+// Initialize Google Analytics
+initGA();
 
 // Hamburger Menu Toggle
 const hamburger = document.getElementById('hamburger');
@@ -7,6 +11,7 @@ const navLinks = document.querySelector('.nav-links');
 
 hamburger.addEventListener('click', () => {
   navLinks.classList.toggle('active');
+  trackEvent('menu_toggle', { action: 'hamburger_click' });
 });
 
 // Close menu when clicking on a link
@@ -89,6 +94,7 @@ let obstacles = [];
 // Event Listeners for Runner
 startGameBtn.addEventListener('click', () => {
   gameModal.classList.remove('hidden');
+  trackGamePlay('Tummy Runner');
   initGame();
 });
 
@@ -216,6 +222,7 @@ function gameOver() {
   isGameOver = true;
   finalScoreEl.textContent = score;
   gameOverEl.classList.remove('hidden');
+  trackEvent('game_over', { game_name: 'Tummy Runner', score: score });
 }
 
 // --- SPIN THE WHEEL GAME LOGIC ---
@@ -235,6 +242,7 @@ startWheelBtn.addEventListener('click', () => {
   wheelModal.classList.remove('hidden');
   wheelResult.classList.add('hidden');
   wheel.style.transform = 'rotate(0deg)';
+  trackGamePlay('Habit Wheel');
 });
 
 closeWheelBtn.addEventListener('click', () => {
@@ -378,6 +386,9 @@ function showResult() {
   else message = "Your tummy needs some love. Let's start healthy habits! 💚";
 
   scoreMessageEl.textContent = message;
+
+  // Track quiz completion
+  trackQuizComplete(totalScore);
 }
 
 restartDqBtn.addEventListener('click', () => {
