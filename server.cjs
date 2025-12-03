@@ -12,23 +12,8 @@ const SECRET_KEY = process.env.SECRET_KEY || 'happytummy_secret_key'; // Use env
 app.use(express.json());
 
 // CORS configuration - allow both localhost and production
-const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:3000',
-    'https://happy-tummiez.vercel.app',
-    'https://happy-tummiez-git-main-anurraggg.vercel.app', // Vercel preview URLs
-];
-
 app.use(cors({
-    origin: function (origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
+    origin: '*', // Allow all origins for debugging
     credentials: true
 }));
 
