@@ -201,6 +201,10 @@
     </div>
     <script type="module">
         import { login } from './src/auth.js';
+        import { initGA } from './src/analytics.js';
+
+        // Initialize Analytics
+        initGA();
 
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
