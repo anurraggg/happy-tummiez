@@ -517,31 +517,273 @@ canvas {
   border-bottom: 25px solid #2D3436;
 }
 
+/* Hamburger Menu */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background-color: var(--text-dark);
+  transition: all 0.3s;
+}
+
+/* Mobile Responsive Styles */
 @media (max-width: 768px) {
-  .hero {
+
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  #app {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Navbar */
+  .navbar {
+    position: relative;
+    padding: 1rem 5%;
+    flex-wrap: nowrap;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  .hamburger {
+    display: flex;
+    z-index: 1001;
+  }
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     flex-direction: column;
+    align-items: center;
+    padding: 2rem 0;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+
+  .nav-links a {
+    margin: 1rem 0;
+    font-size: 1.2rem;
+  }
+
+  /* Hero Section */
+  .hero {
+    flex-direction: column-reverse;
     text-align: center;
-    padding-top: 2rem;
+    padding: 2rem 5%;
+    min-height: auto;
   }
 
   .hero-content {
-    margin-bottom: 3rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    width: 100%;
   }
 
   .hero h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+
+  .hero p {
+    font-size: 1rem;
+    max-width: 100%;
   }
 
   .hero-buttons {
     justify-content: center;
-  }
-
-  .navbar {
     flex-direction: column;
     gap: 1rem;
+    width: 100%;
+  }
+
+  .hero-buttons button {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+  }
+
+  .hero-image {
+    width: 100%;
+  }
+
+  .hero-image img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* DQ Section */
+  .dq-section {
+    padding: 3rem 5%;
   }
 
   .dq-container {
     flex-direction: column;
+    gap: 2rem;
+  }
+
+  .dq-text h2 {
+    font-size: 1.8rem;
+  }
+
+  .dq-text p {
+    font-size: 1rem;
+  }
+
+  .dq-preview-card {
+    width: 100%;
+    padding: 1.5rem;
+  }
+
+  .dq-preview-card h3 {
+    font-size: 1.1rem;
+  }
+
+  /* Features Section */
+  .features {
+    padding: 3rem 5%;
+  }
+
+  .features h2 {
+    font-size: 1.8rem;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .feature-card {
+    padding: 1.5rem;
+  }
+
+  /* Recipes Section */
+  .recipes-section {
+    padding: 3rem 5%;
+  }
+
+  .recipes-section h2 {
+    font-size: 1.8rem;
+  }
+
+  .recipe-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  /* Games Section */
+  .games-section {
+    padding: 3rem 5%;
+  }
+
+  .games-section h2 {
+    font-size: 1.8rem;
+  }
+
+  .game-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .game-card {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  /* Modal Fixes */
+  .modal {
+    padding: 1rem;
+  }
+
+  .modal-content {
+    width: 95%;
+    max-width: 95vw;
+    padding: 1rem;
+  }
+
+  /* Canvas for Tummy Runner */
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100%;
+  }
+
+  /* Wheel Modal Responsive */
+  .wheel-modal-content {
+    width: 95%;
+    max-width: 95vw;
+    padding: 1rem;
+  }
+
+  .wheel-wrapper {
+    width: 250px;
+    height: 250px;
+  }
+
+  .wheel {
+    width: 100%;
+    height: 100%;
+  }
+
+  .center-spin-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 1rem;
+  }
+
+  .center-pointer {
+    top: -12px;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 20px solid #2D3436;
+  }
+
+  .wheel-label span {
+    font-size: 0.9rem;
+    top: 15px;
+  }
+
+  /* Buttons */
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.95rem;
+  }
+
+  .large {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+  }
+
+  /* Ensure no element causes overflow */
+  * {
+    max-width: 100%;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
   }
 }

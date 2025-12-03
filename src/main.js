@@ -1,9 +1,23 @@
 import './style.css'
 import { getCurrentUser, logout } from './auth.js';
 
+// Hamburger Menu Toggle
+const hamburger = document.getElementById('hamburger');
+const navLinks = document.querySelector('.nav-links');
+
+hamburger.addEventListener('click', () => {
+  navLinks.classList.toggle('active');
+});
+
+// Close menu when clicking on a link
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    navLinks.classList.remove('active');
+  });
+});
+
 // Check Auth State
 const user = getCurrentUser();
-const navLinks = document.querySelector('.nav-links');
 
 if (user) {
   // If logged in, show user name and logout button
