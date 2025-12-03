@@ -1,6 +1,6 @@
 import { trackAuth } from './analytics.js';
 
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'https://happy-tummiez-production.up.railway.app/api';
 
 export async function login(email, password) {
     const res = await fetch(`${API_URL}/login`, {
