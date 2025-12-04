@@ -143,11 +143,6 @@
             box-shadow: 0 10px 20px rgba(255, 140, 66, 0.3);
         }
 
-        .btn-secondary {
-            background: #4CAF50;
-            color: white;
-        }
-
         .btn-danger {
             background: #FF6B6B;
             color: white;
@@ -218,7 +213,7 @@
 
         <div class="tabs">
             <div class="tab active" onclick="switchTab('recipes')">📖 Recipes</div>
-            <div class="tab" onclick="switchTab('games')">🎮 Games</div>
+            <div class="tab" onclick="switchTab('hero')">🎨 Hero Section</div>
         </div>
 
         <!-- Recipes Section -->
@@ -261,32 +256,32 @@
             </div>
         </div>
 
-        <!-- Games Section -->
-        <div id="games-section" class="content-section">
+        <!-- Hero Section -->
+        <div id="hero-section" class="content-section">
             <div class="card">
-                <h2>Add New Game</h2>
-                <div id="game-success" class="success-message"></div>
-                <div id="game-error" class="error-message"></div>
-                <form id="game-form">
+                <h2>Edit Hero Section</h2>
+                <div id="hero-success" class="success-message"></div>
+                <div id="hero-error" class="error-message"></div>
+                <form id="hero-form">
                     <div class="form-group">
-                        <label>Game Title</label>
-                        <input type="text" id="game-title" required placeholder="e.g., Tummy Runner">
+                        <label>Main Heading (Line 1)</label>
+                        <input type="text" id="hero-heading1" required placeholder="e.g., Unlock Your">
                     </div>
                     <div class="form-group">
-                        <label>Description</label>
-                        <textarea id="game-description" required placeholder="Game description..."></textarea>
+                        <label>Main Heading (Line 2)</label>
+                        <input type="text" id="hero-heading2" required placeholder="e.g., Digestive Superpower">
                     </div>
                     <div class="form-group">
-                        <label>Thumbnail URL</label>
-                        <input type="url" id="game-thumbnail" placeholder="https://example.com/thumbnail.jpg">
+                        <label>Description Text</label>
+                        <textarea id="hero-description" required
+                            placeholder="Discover the secrets to a happier, healthier you..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">Add Game</button>
+                    <div class="form-group">
+                        <label>Hero Image URL</label>
+                        <input type="url" id="hero-image" required placeholder="https://example.com/hero-image.png">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Hero Section</button>
                 </form>
-            </div>
-
-            <div class="card">
-                <h2>Existing Games</h2>
-                <div id="games-list" class="items-grid"></div>
             </div>
         </div>
     </div>
@@ -309,6 +304,10 @@
 
             event.target.classList.add('active');
             document.getElementById(`${tab}-section`).classList.add('active');
+
+            if (tab === 'hero') {
+                loadHeroContent();
+            }
         };
 
         // Recipe Management
@@ -376,72 +375,55 @@
             }
         });
 
-        // Game Management
-        async function loadGames() {
+        // Hero Section Management
+        async function loadHeroContent() {
             try {
-                const response = await fetch(`${API_URL}/games`);
-                const games = await response.json();
+                const response = await fetch(`${API_URL}/hero`);
+                const hero = await response.json();
 
-                const listEl = document.getElementById('games-list');
-                listEl.innerHTML = games.map(game => `
-                    <div class="item-card">
-                        <h3>${game.title}</h3>
-                        <p>${game.description}</p>
-                        <div class="item-actions">
-                            <button class="btn btn-danger" onclick="deleteGame(${game.id})">Delete</button>
-                        </div>
-                    </div>
-                `).join('');
+                if (hero) {
+                    document.getElementById('hero-heading1').value = hero.heading1 || '';
+                    document.getElementById('hero-heading2').value = hero.heading2 || '';
+                    document.getElementById('hero-description').value = hero.description || '';
+                    document.getElementById('hero-image').value = hero.image_url || '';
+                }
             } catch (err) {
-                console.error('Error loading games:', err);
+                console.error('Error loading hero content:', err);
             }
         }
 
-        window.deleteGame = async (id) => {
-            if (!confirm('Are you sure you want to delete this game?')) return;
-
-            try {
-                await fetch(`${API_URL}/games/${id}`, { method: 'DELETE' });
-                loadGames();
-            } catch (err) {
-                console.error('Error deleting game:', err);
-            }
-        };
-
-        document.getElementById('game-form').addEventListener('submit', async (e) => {
+        document.getElementById('hero-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const game = {
-                title: document.getElementById('game-title').value,
-                description: document.getElementById('game-description').value,
-                thumbnail_url: document.getElementById('game-thumbnail').value
+            const hero = {
+                heading1: document.getElementById('hero-heading1').value,
+                heading2: document.getElementById('hero-heading2').value,
+                description: document.getElementById('hero-description').value,
+                image_url: document.getElementById('hero-image').value
             };
 
             try {
-                const response = await fetch(`${API_URL}/games`, {
+                const response = await fetch(`${API_URL}/hero`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(game)
+                    body: JSON.stringify(hero)
                 });
 
                 if (response.ok) {
-                    document.getElementById('game-success').textContent = 'Game added successfully!';
-                    document.getElementById('game-success').style.display = 'block';
-                    document.getElementById('game-form').reset();
-                    loadGames();
+                    document.getElementById('hero-success').textContent = 'Hero section updated successfully!';
+                    document.getElementById('hero-success').style.display = 'block';
                     setTimeout(() => {
-                        document.getElementById('game-success').style.display = 'none';
+                        document.getElementById('hero-success').style.display = 'none';
                     }, 3000);
                 }
             } catch (err) {
-                document.getElementById('game-error').textContent = 'Error adding game';
-                document.getElementById('game-error').style.display = 'block';
+                document.getElementById('hero-error').textContent = 'Error updating hero section';
+                document.getElementById('hero-error').style.display = 'block';
             }
         });
 
         // Load initial data
         loadRecipes();
-        loadGames();
     </script>
 </body>
 

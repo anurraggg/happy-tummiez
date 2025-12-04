@@ -93,6 +93,26 @@ pool.query(createGamesTable, (err) => {
     }
 });
 
+// Create hero content table
+const createHeroTable = `
+    CREATE TABLE IF NOT EXISTS hero_content (
+        id SERIAL PRIMARY KEY,
+        heading1 VARCHAR(255),
+        heading2 VARCHAR(255),
+        description TEXT,
+        image_url VARCHAR(500),
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+`;
+
+pool.query(createHeroTable, (err) => {
+    if (err) {
+        console.error('Error creating hero_content table:', err);
+    } else {
+        console.log('Hero content table ready');
+    }
+});
+
 // Routes
 app.post('/api/register', async (req, res) => {
     const { name, email, password } = req.body;
@@ -260,6 +280,47 @@ app.delete('/api/games/:id', async (req, res) => {
         res.json({ message: 'Game deleted' });
     } catch (err) {
         console.error('Error deleting game:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ========== HERO CONTENT ENDPOINTS ==========
+
+// Get hero content
+app.get('/api/hero', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM hero_content ORDER BY id DESC LIMIT 1');
+        res.json(result.rows[0] || null);
+    } catch (err) {
+        console.error('Error fetching hero content:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Update/Create hero content
+app.post('/api/hero', async (req, res) => {
+    const { heading1, heading2, description, image_url } = req.body;
+    try {
+        // Check if hero content exists
+        const existing = await pool.query('SELECT id FROM hero_content LIMIT 1');
+
+        if (existing.rows.length > 0) {
+            // Update existing
+            const result = await pool.query(
+                'UPDATE hero_content SET heading1=$1, heading2=$2, description=$3, image_url=$4, updated_at=CURRENT_TIMESTAMP WHERE id=$5 RETURNING *',
+                [heading1, heading2, description, image_url, existing.rows[0].id]
+            );
+            res.json(result.rows[0]);
+        } else {
+            // Create new
+            const result = await pool.query(
+                'INSERT INTO hero_content (heading1, heading2, description, image_url) VALUES ($1, $2, $3, $4) RETURNING *',
+                [heading1, heading2, description, image_url]
+            );
+            res.json(result.rows[0]);
+        }
+    } catch (err) {
+        console.error('Error updating hero content:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });
