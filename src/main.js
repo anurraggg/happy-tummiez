@@ -52,6 +52,45 @@ if (user) {
   navLinks.appendChild(signupLink);
 }
 
+// ========== LOAD DYNAMIC CONTENT FROM CMS ==========
+
+const API_URL = 'https://happy-tummiez-production.up.railway.app/api';
+
+// Load Recipes from Database
+async function loadRecipes() {
+  try {
+    const response = await fetch(`${API_URL}/recipes`);
+    const recipes = await response.json();
+
+    const recipeGrid = document.querySelector('.recipe-grid');
+    if (recipeGrid && recipes.length > 0) {
+      recipeGrid.innerHTML = recipes.map(recipe => `
+        <div class="recipe-card">
+          ${recipe.image_url
+          ? `<img src="${recipe.image_url}" alt="${recipe.title}" />`
+          : `<div class="placeholder-img" style="background: #FFE082; display: flex; align-items: center; justify-content: center; font-size: 3rem; height: 200px;">🍽️</div>`
+        }
+          <div class="recipe-info">
+            <h3>${recipe.title}</h3>
+            <p>${recipe.description}</p>
+            <a href="#" class="read-more" onclick="showRecipeDetails(${recipe.id}); return false;">View Recipe →</a>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch (err) {
+    console.error('Error loading recipes:', err);
+  }
+}
+
+// Show recipe details (you can expand this later)
+window.showRecipeDetails = (id) => {
+  alert('Recipe details coming soon! Recipe ID: ' + id);
+};
+
+// Load recipes when page loads
+loadRecipes();
+
 // Smooth scrolling for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function (e) {
