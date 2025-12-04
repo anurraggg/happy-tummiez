@@ -280,7 +280,11 @@
                         <label>Hero Image URL</label>
                         <input type="url" id="hero-image" required placeholder="https://example.com/hero-image.png">
                     </div>
-                    <button type="submit" class="btn btn-primary">Update Hero Section</button>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Update Hero Section</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetHeroToDefault()"
+                            style="flex: 1; background: #636E72;">Reset to Default</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -421,6 +425,43 @@
                 document.getElementById('hero-error').style.display = 'block';
             }
         });
+
+        // Reset hero to default values
+        window.resetHeroToDefault = async () => {
+            if (!confirm('Are you sure you want to reset the hero section to default values?')) return;
+
+            const defaultHero = {
+                heading1: 'Unlock Your',
+                heading2: 'Digestive Superpower',
+                description: 'Discover the secrets to a happier, healthier you with our interactive Digestive Quotient test and fun learning games.',
+                image_url: '/hero-bg.png'
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/hero`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(defaultHero)
+                });
+
+                if (response.ok) {
+                    // Update form fields
+                    document.getElementById('hero-heading1').value = defaultHero.heading1;
+                    document.getElementById('hero-heading2').value = defaultHero.heading2;
+                    document.getElementById('hero-description').value = defaultHero.description;
+                    document.getElementById('hero-image').value = defaultHero.image_url;
+
+                    document.getElementById('hero-success').textContent = 'Hero section reset to default successfully!';
+                    document.getElementById('hero-success').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('hero-success').style.display = 'none';
+                    }, 3000);
+                }
+            } catch (err) {
+                document.getElementById('hero-error').textContent = 'Error resetting hero section';
+                document.getElementById('hero-error').style.display = 'block';
+            }
+        };
 
         // Load initial data
         loadRecipes();
