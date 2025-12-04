@@ -1,65 +1,120 @@
 const express = require('express');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const SECRET_KEY = process.env.SECRET_KEY || 'happytummy_secret_key'; // Use env var in production
+const SECRET_KEY = process.env.SECRET_KEY || 'happytummy_secret_key';
 
 app.use(express.json());
 
-// CORS configuration - allow both localhost and production
+// CORS configuration
 app.use(cors({
-    origin: '*', // Allow all origins for debugging
+    origin: '*',
     credentials: true
 }));
 
-// Database Setup
-const db = new sqlite3.Database('./database.sqlite', (err) => {
-    if (err) console.error('DB Error:', err.message);
-    else console.log('Connected to SQLite database.');
+// PostgreSQL Database Setup
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-db.run(`CREATE TABLE IF NOT EXISTS users (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  email TEXT UNIQUE,
-  password TEXT,
-  name TEXT
-)`);
+// Test database connection
+pool.connect((err, client, release) => {
+    if (err) {
+        console.error('Error connecting to PostgreSQL:', err.stack);
+    } else {
+        console.log('Connected to PostgreSQL database');
+        release();
+    }
+});
+
+// Create users table if it doesn't exist
+const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+`;
+
+pool.query(createTableQuery, (err) => {
+    if (err) {
+        console.error('Error creating table:', err);
+    } else {
+        console.log('Users table ready');
+    }
+});
 
 // Routes
-app.post('/api/register', (req, res) => {
+app.post('/api/register', async (req, res) => {
     const { name, email, password } = req.body;
-    const hashedPassword = bcrypt.hashSync(password, 8);
 
-    db.run(`INSERT INTO users (name, email, password) VALUES (?, ?, ?)`,
-        [name, email, hashedPassword],
-        function (err) {
-            if (err) {
-                return res.status(400).json({ error: 'Email already exists' });
-            }
-            const token = jwt.sign({ id: this.lastID }, SECRET_KEY, { expiresIn: '24h' });
-            res.json({ message: 'User registered', token, user: { id: this.lastID, name, email } });
+    try {
+        const hashedPassword = bcrypt.hashSync(password, 8);
+
+        const result = await pool.query(
+            'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email',
+            [name, email, hashedPassword]
+        );
+
+        const user = result.rows[0];
+        const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '24h' });
+
+        res.json({
+            message: 'User registered',
+            token,
+            user: { id: user.id, name: user.name, email: user.email }
+        });
+    } catch (err) {
+        if (err.code === '23505') { // Unique violation
+            return res.status(400).json({ error: 'Email already exists' });
         }
-    );
+        console.error('Registration error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
 });
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
 
-    db.get(`SELECT * FROM users WHERE email = ?`, [email], (err, user) => {
-        if (err) return res.status(500).json({ error: 'Server error' });
-        if (!user) return res.status(404).json({ error: 'User not found' });
+    try {
+        const result = await pool.query(
+            'SELECT * FROM users WHERE email = $1',
+            [email]
+        );
 
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const user = result.rows[0];
         const passwordIsValid = bcrypt.compareSync(password, user.password);
-        if (!passwordIsValid) return res.status(401).json({ error: 'Invalid password' });
+
+        if (!passwordIsValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
 
         const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '24h' });
-        res.json({ message: 'Login successful', token, user: { id: user.id, name: user.name, email: user.email } });
-    });
+        res.json({
+            message: 'Login successful',
+            token,
+            user: { id: user.id, name: user.name, email: user.email }
+        });
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', database: 'postgresql' });
 });
 
 app.listen(PORT, () => {
