@@ -497,12 +497,55 @@
             }
         };
 
+        
+        // ========== QUILL RICH TEXT EDITOR ==========
+        let descriptionQuill = null;
+
+        function initQuillEditor() {
+            if (!descriptionQuill && document.getElementById('hero-description-editor')) {
+                descriptionQuill = new Quill('#hero-description-editor', {
+                    theme: 'snow',
+                    placeholder: 'Enter description... Use toolbar to format!',
+                    modules: {
+                        toolbar: [
+                            [{ 'header': [1, 2, 3, false] }],
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'color': [] }, { 'background': [] }],
+                            [{ 'font': [] }],
+                            [{ 'align': [] }],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            ['link'],
+                            ['clean']
+                        ]
+                    }
+                });
+                
+                descriptionQuill.on('text-change', function() {
+                    document.getElementById('hero-description-hidden').value = descriptionQuill.root.innerHTML;
+                    document.getElementById('hero-description').value = descriptionQuill.root.innerHTML;
+                });
+            }
+        }
+
+        // Initialize on page load
+        setTimeout(() => {
+            const heroTab = document.querySelector('.tab:nth-child(2)');
+            if (heroTab) {
+                const originalClick = heroTab.onclick;
+                heroTab.onclick = function(e) {
+                    originalClick.call(this, e);
+                    setTimeout(() => initQuillEditor(), 150);
+                };
+            }
+        }, 500);
+
         // Load initial data
         loadRecipes();
     </script>
 </body>
 
 </html>
+
 
 
 
