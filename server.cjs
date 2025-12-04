@@ -45,9 +45,51 @@ const createTableQuery = `
 
 pool.query(createTableQuery, (err) => {
     if (err) {
-        console.error('Error creating table:', err);
+        console.error('Error creating users table:', err);
     } else {
         console.log('Users table ready');
+    }
+});
+
+// Create recipes table
+const createRecipesTable = `
+    CREATE TABLE IF NOT EXISTS recipes (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        ingredients TEXT,
+        instructions TEXT,
+        image_url VARCHAR(500),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+`;
+
+pool.query(createRecipesTable, (err) => {
+    if (err) {
+        console.error('Error creating recipes table:', err);
+    } else {
+        console.log('Recipes table ready');
+    }
+});
+
+// Create games table
+const createGamesTable = `
+    CREATE TABLE IF NOT EXISTS games (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        description TEXT,
+        thumbnail_url VARCHAR(500),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+`;
+
+pool.query(createGamesTable, (err) => {
+    if (err) {
+        console.error('Error creating games table:', err);
+    } else {
+        console.log('Games table ready');
     }
 });
 
@@ -108,6 +150,116 @@ app.post('/api/login', async (req, res) => {
         });
     } catch (err) {
         console.error('Login error:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// ========== CONTENT MANAGEMENT ENDPOINTS ==========
+
+// Get all recipes
+app.get('/api/recipes', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM recipes ORDER BY created_at DESC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching recipes:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Create recipe
+app.post('/api/recipes', async (req, res) => {
+    const { title, description, ingredients, instructions, image_url } = req.body;
+    try {
+        const result = await pool.query(
+            'INSERT INTO recipes (title, description, ingredients, instructions, image_url) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [title, description, ingredients, instructions, image_url]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error creating recipe:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Update recipe
+app.put('/api/recipes/:id', async (req, res) => {
+    const { id } = req.params;
+    const { title, description, ingredients, instructions, image_url } = req.body;
+    try {
+        const result = await pool.query(
+            'UPDATE recipes SET title=$1, description=$2, ingredients=$3, instructions=$4, image_url=$5, updated_at=CURRENT_TIMESTAMP WHERE id=$6 RETURNING *',
+            [title, description, ingredients, instructions, image_url, id]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating recipe:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete recipe
+app.delete('/api/recipes/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM recipes WHERE id=$1', [id]);
+        res.json({ message: 'Recipe deleted' });
+    } catch (err) {
+        console.error('Error deleting recipe:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Get all games
+app.get('/api/games', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM games ORDER BY created_at DESC');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching games:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Create game
+app.post('/api/games', async (req, res) => {
+    const { title, description, thumbnail_url } = req.body;
+    try {
+        const result = await pool.query(
+            'INSERT INTO games (title, description, thumbnail_url) VALUES ($1, $2, $3) RETURNING *',
+            [title, description, thumbnail_url]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error creating game:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Update game
+app.put('/api/games/:id', async (req, res) => {
+    const { id } = req.params;
+    const { title, description, thumbnail_url } = req.body;
+    try {
+        const result = await pool.query(
+            'UPDATE games SET title=$1, description=$2, thumbnail_url=$3, updated_at=CURRENT_TIMESTAMP WHERE id=$4 RETURNING *',
+            [title, description, thumbnail_url, id]
+        );
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error updating game:', err);
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Delete game
+app.delete('/api/games/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        await pool.query('DELETE FROM games WHERE id=$1', [id]);
+        res.json({ message: 'Game deleted' });
+    } catch (err) {
+        console.error('Error deleting game:', err);
         res.status(500).json({ error: 'Server error' });
     }
 });

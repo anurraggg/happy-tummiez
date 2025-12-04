@@ -8,6 +8,7 @@ export default defineConfig({
                 main: resolve(__dirname, 'index.html'),
                 login: resolve(__dirname, 'login.html'),
                 signup: resolve(__dirname, 'signup.html'),
+                admin: resolve(__dirname, 'admin.html'),
                 notfound: resolve(__dirname, '404.html')
             },
         },

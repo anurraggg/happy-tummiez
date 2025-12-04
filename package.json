@@ -12,6 +12,8 @@
     "vite": "^7.2.4"
   },
   "dependencies": {
+    "@sanity/client": "^7.13.1",
+    "@sanity/image-url": "^2.0.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "express": "^5.2.1",
