@@ -281,10 +281,16 @@ body {
   margin-bottom: 3rem;
 }
 
+.recipe-carousel {
+  position: relative;
+  overflow: hidden;
+  padding: 0 3rem;
+}
+
 .recipe-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
   gap: 2rem;
+  transition: transform 0.5s ease-in-out;
 }
 
 .recipe-card {
@@ -293,6 +299,8 @@ body {
   overflow: hidden;
   box-shadow: var(--shadow);
   transition: transform 0.3s;
+  flex: 0 0 calc(33.333% - 1.5rem);
+  min-width: calc(33.333% - 1.5rem);
 }
 
 .recipe-card:hover {
@@ -316,6 +324,73 @@ body {
   text-decoration: none;
   display: inline-block;
   margin-top: 1rem;
+}
+
+/* Carousel Navigation Arrows */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--primary);
+  color: white;
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(255, 140, 66, 0.3);
+}
+
+.carousel-arrow:hover {
+  background: var(--primary-hover);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-arrow.prev {
+  left: 0;
+}
+
+.carousel-arrow.next {
+  right: 0;
+}
+
+.carousel-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.carousel-arrow:disabled:hover {
+  transform: translateY(-50%);
+}
+
+/* Carousel Dots */
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.carousel-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #E0E0E0;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.carousel-dot.active {
+  background: var(--primary);
+  width: 30px;
+  border-radius: 6px;
 }
 
 /* Games Section */

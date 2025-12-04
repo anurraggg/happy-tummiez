@@ -56,31 +56,103 @@ if (user) {
 
 const API_URL = 'https://happy-tummiez-production.up.railway.app/api';
 
-// Load Recipes from Database
+// Load Recipes from Database with Carousel
+let currentSlide = 0;
+let totalRecipes = 0;
+const recipesPerSlide = 3;
+
 async function loadRecipes() {
   try {
     const response = await fetch(`${API_URL}/recipes`);
     const recipes = await response.json();
+    totalRecipes = recipes.length;
 
-    const recipeGrid = document.querySelector('.recipe-grid');
-    if (recipeGrid && recipes.length > 0) {
-      recipeGrid.innerHTML = recipes.map(recipe => `
-        <div class="recipe-card">
-          ${recipe.image_url
-          ? `<img src="${recipe.image_url}" alt="${recipe.title}" />`
-          : `<div class="placeholder-img" style="background: #FFE082; display: flex; align-items: center; justify-content: center; font-size: 3rem; height: 200px;">🍽️</div>`
-        }
-          <div class="recipe-info">
-            <h3>${recipe.title}</h3>
-            <p>${recipe.description}</p>
-            <a href="#" class="read-more" onclick="showRecipeDetails(${recipe.id}); return false;">View Recipe →</a>
-          </div>
+    const recipesSection = document.querySelector('.recipes-section');
+    if (!recipesSection || recipes.length === 0) return;
+
+    // Create carousel structure
+    const carouselHTML = `
+      <div class="recipe-carousel">
+        <button class="carousel-arrow prev" onclick="moveSlide(-1)">‹</button>
+        <div class="recipe-grid">
+          ${recipes.map(recipe => `
+            <div class="recipe-card">
+              ${recipe.image_url
+        ? `<img src="${recipe.image_url}" alt="${recipe.title}" />`
+        : `<div class="placeholder-img" style="background: #FFE082; display: flex; align-items: center; justify-content: center; font-size: 3rem; height: 200px;">🍽️</div>`
+      }
+              <div class="recipe-info">
+                <h3>${recipe.title}</h3>
+                <p>${recipe.description}</p>
+                <a href="#" class="read-more" onclick="showRecipeDetails(${recipe.id}); return false;">View Recipe →</a>
+              </div>
+            </div>
+          `).join('')}
         </div>
-      `).join('');
+        <button class="carousel-arrow next" onclick="moveSlide(1)">›</button>
+      </div>
+      <div class="carousel-dots"></div>
+    `;
+
+    // Replace existing grid
+    const existingGrid = recipesSection.querySelector('.recipe-grid');
+    if (existingGrid) {
+      existingGrid.parentElement.outerHTML = carouselHTML;
     }
+
+    // Create dots
+    const totalSlides = Math.ceil(totalRecipes / recipesPerSlide);
+    const dotsContainer = recipesSection.querySelector('.carousel-dots');
+    if (dotsContainer) {
+      dotsContainer.innerHTML = Array.from({ length: totalSlides }, (_, i) =>
+        `<button class="carousel-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></button>`
+      ).join('');
+    }
+
+    updateCarousel();
   } catch (err) {
     console.error('Error loading recipes:', err);
   }
+}
+
+// Move carousel
+window.moveSlide = (direction) => {
+  const totalSlides = Math.ceil(totalRecipes / recipesPerSlide);
+  currentSlide += direction;
+
+  if (currentSlide < 0) currentSlide = 0;
+  if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+
+  updateCarousel();
+};
+
+// Go to specific slide
+window.goToSlide = (slideIndex) => {
+  currentSlide = slideIndex;
+  updateCarousel();
+};
+
+// Update carousel position and controls
+function updateCarousel() {
+  const grid = document.querySelector('.recipe-grid');
+  const prevBtn = document.querySelector('.carousel-arrow.prev');
+  const nextBtn = document.querySelector('.carousel-arrow.next');
+  const dots = document.querySelectorAll('.carousel-dot');
+  const totalSlides = Math.ceil(totalRecipes / recipesPerSlide);
+
+  if (grid) {
+    const offset = currentSlide * 100;
+    grid.style.transform = `translateX(-${offset}%)`;
+  }
+
+  // Update button states
+  if (prevBtn) prevBtn.disabled = currentSlide === 0;
+  if (nextBtn) nextBtn.disabled = currentSlide >= totalSlides - 1;
+
+  // Update dots
+  dots.forEach((dot, index) => {
+    dot.classList.toggle('active', index === currentSlide);
+  });
 }
 
 // Show recipe details (you can expand this later)
