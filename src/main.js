@@ -175,10 +175,10 @@ async function loadHeroContent() {
         heroHeading.innerHTML = `${hero.heading1 || 'Unlock Your'} <br><span class="gradient-text">${hero.heading2 || 'Digestive Superpower'}</span>`;
       }
 
-      // Update description
+      // Update description (use innerHTML to render formatted text from Quill)
       const heroDescription = document.querySelector('.hero-content p');
       if (heroDescription) {
-        heroDescription.textContent = hero.description || 'Discover the secrets to a happier, healthier you with our interactive Digestive Quotient test and fun learning games.';
+        heroDescription.innerHTML = hero.description || 'Discover the secrets to a happier, healthier you with our interactive Digestive Quotient test and fun learning games.';
       }
 
       // Update image
