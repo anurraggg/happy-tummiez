@@ -162,8 +162,39 @@ window.showRecipeDetails = (id) => {
   alert('Recipe details coming soon! Recipe ID: ' + id);
 };
 
-// Load recipes when page loads
+// Load Hero Content from Database
+async function loadHeroContent() {
+  try {
+    const response = await fetch(`${API_URL}/hero`);
+    const hero = await response.json();
+
+    if (hero) {
+      // Update heading
+      const heroHeading = document.querySelector('.hero-content h1');
+      if (heroHeading) {
+        heroHeading.innerHTML = `${hero.heading1 || 'Unlock Your'} <br><span class="gradient-text">${hero.heading2 || 'Digestive Superpower'}</span>`;
+      }
+
+      // Update description
+      const heroDescription = document.querySelector('.hero-content p');
+      if (heroDescription) {
+        heroDescription.textContent = hero.description || 'Discover the secrets to a happier, healthier you with our interactive Digestive Quotient test and fun learning games.';
+      }
+
+      // Update image
+      const heroImage = document.querySelector('.hero-image img');
+      if (heroImage && hero.image_url) {
+        heroImage.src = hero.image_url;
+      }
+    }
+  } catch (err) {
+    console.error('Error loading hero content:', err);
+  }
+}
+
+// Load content when page loads
 loadRecipes();
+loadHeroContent();
 
 // Smooth scrolling for navigation links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
