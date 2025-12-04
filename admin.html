@@ -275,7 +275,9 @@
                         <input type="text" id="hero-heading2" required placeholder="e.g., Digestive Superpower">
                     </div>
                     <div class="form-group">
-                        <label>Description Text <small style="color: #636E72;">(Use toolbar to format text)</small></label><div id="hero-description-editor" style="background: white; border: 2px solid #E0E0E0; border-radius: 10px; min-height: 200px;"></div><input type="hidden" id="hero-description-hidden" required><textarea id="hero-description" style="display:none;"></textarea>
+                        <label>Description Text <small style="color: #636E72;">(Use toolbar to format)</small></label>
+                        <div id="quill-editor" style="height: 200px;"></div>
+                        <textarea id="hero-description" required style="display:none;"></textarea>
                     </div>
                     <div class="form-group">
                         <label>Hero Image URL</label>
@@ -302,39 +304,6 @@
             window.location.href = '/login.html';
         }
 
-        
-        // Quill Editor Instance
-        let descriptionQuill = null;
-
-        // Initialize Quill Editor
-        function initQuillEditor() {
-            if (!descriptionQuill && document.getElementById('hero-description-editor')) {
-                descriptionQuill = new Quill('#hero-description-editor', {
-                    theme: 'snow',
-                    placeholder: 'Enter description text... Use the toolbar to format!',
-                    modules: {
-                        toolbar: [
-                            [{ 'header': [1, 2, 3, false] }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'color': [] }, { 'background': [] }],
-                            [{ 'font': [] }],
-                            [{ 'align': [] }],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            ['link'],
-                            ['clean']
-                        ]
-                    }
-                });
-                
-                // Sync Quill content to hidden input
-                descriptionQuill.on('text-change', function() {
-                    const html = descriptionQuill.root.innerHTML;
-                    document.getElementById('hero-description-hidden').value = html;
-                    document.getElementById('hero-description').value = html;
-                });
-            }
-        }
-
         // Tab switching
         window.switchTab = (tab) => {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -345,7 +314,6 @@
 
             if (tab === 'hero') {
                 loadHeroContent();
-                setTimeout(() => initQuillEditor(), 100);
             }
         };
 
@@ -423,7 +391,7 @@
                 if (hero) {
                     document.getElementById('hero-heading1').value = hero.heading1 || '';
                     document.getElementById('hero-heading2').value = hero.heading2 || '';
-                    if (descriptionQuill) { descriptionQuill.root.innerHTML = hero.description || ''; } else { document.getElementById('hero-description').value = hero.description || ''; }
+                    document.getElementById('hero-description').value = hero.description || '';
                     document.getElementById('hero-image').value = hero.image_url || '';
                 }
             } catch (err) {
@@ -498,55 +466,73 @@
             }
         };
 
-        
-        // ========== QUILL RICH TEXT EDITOR ==========
-        let descriptionQuill = null;
+        // Load initial data
+        loadRecipes();
 
-        function initQuillEditor() {
-            if (!descriptionQuill && document.getElementById('hero-description-editor')) {
-                descriptionQuill = new Quill('#hero-description-editor', {
+        // Initialize Quill Rich Text Editor
+        let quill = null;
+        
+        function initQuill() {
+            if (document.getElementById('quill-editor') && !quill) {
+                quill = new Quill('#quill-editor', {
                     theme: 'snow',
-                    placeholder: 'Enter description... Use toolbar to format!',
+                    placeholder: 'Enter description text...',
                     modules: {
                         toolbar: [
                             [{ 'header': [1, 2, 3, false] }],
-                            ['bold', 'italic', 'underline', 'strike'],
+                            ['bold', 'italic', 'underline'],
                             [{ 'color': [] }, { 'background': [] }],
-                            [{ 'font': [] }],
                             [{ 'align': [] }],
                             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            ['link'],
                             ['clean']
                         ]
                     }
                 });
                 
-                descriptionQuill.on('text-change', function() {
-                    document.getElementById('hero-description-hidden').value = descriptionQuill.root.innerHTML;
-                    document.getElementById('hero-description').value = descriptionQuill.root.innerHTML;
+                quill.on('text-change', function() {
+                    document.getElementById('hero-description').value = quill.root.innerHTML;
                 });
             }
         }
 
-        // Initialize on page load
-        setTimeout(() => {
-            const heroTab = document.querySelector('.tab:nth-child(2)');
-            if (heroTab) {
-                const originalClick = heroTab.onclick;
-                heroTab.onclick = function(e) {
-                    originalClick.call(this, e);
-                    setTimeout(() => initQuillEditor(), 150);
-                };
-            }
-        }, 500);
+        const originalSwitchTab = window.switchTab;
+        window.switchTab = function(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tab}-section`).classList.add('active');
 
-        // Load initial data
-        loadRecipes();
+            if (tab === 'hero') {
+                loadHeroContent();
+                setTimeout(initQuill, 100);
+            }
+        };
+
+        const originalLoadHero = loadHeroContent;
+        loadHeroContent = async function() {
+            try {
+                const response = await fetch(`${API_URL}/hero`);
+                const hero = await response.json();
+                
+                if (hero) {
+                    document.getElementById('hero-heading1').value = hero.heading1 || '';
+                    document.getElementById('hero-heading2').value = hero.heading2 || '';
+                    document.getElementById('hero-image').value = hero.image_url || '';
+                    
+                    if (quill) {
+                        quill.root.innerHTML = hero.description || '';
+                    }
+                    document.getElementById('hero-description').value = hero.description || '';
+                }
+            } catch (err) {
+                console.error('Error loading hero content:', err);
+            }
+        };
+
     </script>
 </body>
 
 </html>
-
-
 
 
