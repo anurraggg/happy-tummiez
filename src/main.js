@@ -74,20 +74,22 @@ async function loadRecipes() {
     const carouselHTML = `
       <div class="recipe-carousel">
         <button class="carousel-arrow prev" onclick="moveSlide(-1)">‹</button>
-        <div class="recipe-grid">
-          ${recipes.map(recipe => `
-            <div class="recipe-card">
-              ${recipe.image_url
+        <div class="recipe-carousel-wrapper">
+          <div class="recipe-grid">
+            ${recipes.map(recipe => `
+              <div class="recipe-card">
+                ${recipe.image_url
         ? `<img src="${recipe.image_url}" alt="${recipe.title}" />`
         : `<div class="placeholder-img" style="background: #FFE082; display: flex; align-items: center; justify-content: center; font-size: 3rem; height: 200px;">🍽️</div>`
       }
-              <div class="recipe-info">
-                <h3>${recipe.title}</h3>
-                <p>${recipe.description}</p>
-                <a href="#" class="read-more" onclick="showRecipeDetails(${recipe.id}); return false;">View Recipe →</a>
+                <div class="recipe-info">
+                  <h3>${recipe.title}</h3>
+                  <p>${recipe.description}</p>
+                  <a href="#" class="read-more" onclick="showRecipeDetails(${recipe.id}); return false;">View Recipe →</a>
+                </div>
               </div>
-            </div>
-          `).join('')}
+            `).join('')}
+          </div>
         </div>
         <button class="carousel-arrow next" onclick="moveSlide(1)">›</button>
       </div>
