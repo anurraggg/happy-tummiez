@@ -54,7 +54,7 @@ if (user) {
 
 // ========== LOAD DYNAMIC CONTENT FROM CMS ==========
 
-const API_URL = 'https://happy-tummiez-production.up.railway.app/api';
+const API_URL = 'https://happy-tummiez-backend.onrender.com/api';
 
 // Load Recipes from Database with Carousel
 let currentSlide = 0;
