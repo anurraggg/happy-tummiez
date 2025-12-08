@@ -298,10 +298,14 @@
 
         const API_URL = 'https://happy-tummiez-production.up.railway.app/api';
 
-        // Check if user is logged in
+        // Check if user is logged in and is admin
         const user = getCurrentUser();
         if (!user) {
+            alert('Please login to access the admin panel');
             window.location.href = '/login.html';
+        } else if (user.email !== 'admin@mail.com') {
+            alert('Access Denied: Admin access only');
+            window.location.href = '/index.html';
         }
 
         // Tab switching
@@ -534,5 +538,6 @@
 </body>
 
 </html>
+
 
 
